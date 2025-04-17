@@ -1,5 +1,57 @@
 /* Main CSS for the Fake News Detector Application */
 
+/* Feature Icons */
+.feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  font-size: 1.5rem;
+}
+
+/* Animation classes */
+.animate__animated {
+  animation-duration: 0.8s;
+}
+
+/* Result badge styling */
+.result-badge {
+  width: 180px;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Method badges */
+.method-badge {
+  font-weight: 500;
+}
+
+/* Factor highlight in results */
+.factor-text {
+  word-break: break-word;
+}
+
+/* Sample articles */
+.sample-article {
+  max-height: 150px;
+  overflow: hidden;
+  position: relative;
+}
+
+.sample-article::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+}
+
 :root {
   --primary-color: #3498db;
   --secondary-color: #2c3e50;
