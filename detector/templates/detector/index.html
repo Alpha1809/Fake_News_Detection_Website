@@ -1,0 +1,196 @@
+{% extends 'detector/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0 rounded-lg mt-3 mb-5">
+            <div class="card-header bg-primary text-white">
+                <h3 class="text-center font-weight-light my-2">
+                    <i class="bi bi-search"></i> Fake News Detector
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="bi bi-info-circle-fill"></i> Enter a news article text or URL to analyze if it's fake news or not.
+                </div>
+                
+                <ul class="nav nav-tabs mb-3" id="detectionTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-panel" type="button" role="tab">
+                            <i class="bi bi-file-text"></i> Text Analysis
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="url-tab" data-bs-toggle="tab" data-bs-target="#url-panel" type="button" role="tab">
+                            <i class="bi bi-link-45deg"></i> URL Analysis
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="detectionTabsContent">
+                    <!-- Text Analysis Panel -->
+                    <div class="tab-pane fade show active" id="text-panel" role="tabpanel">
+                        <form id="textAnalysisForm">
+                            <div class="mb-3">
+                                <label for="news_text" class="form-label">News Article Text</label>
+                                <textarea class="form-control" id="news_text" name="news_text" rows="6" placeholder="Paste the news article text here..."></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg" id="analyzeTextBtn">
+                                    <i class="bi bi-magic"></i> Analyze Text
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- URL Analysis Panel -->
+                    <div class="tab-pane fade" id="url-panel" role="tabpanel">
+                        <form id="urlAnalysisForm">
+                            <div class="mb-3">
+                                <label for="news_url" class="form-label">News Article URL</label>
+                                <input type="url" class="form-control" id="news_url" name="news_url" placeholder="https://example.com/news-article">
+                            </div>
+                            <div class="alert alert-secondary" role="alert">
+                                <small>
+                                    <i class="bi bi-lightbulb"></i> URL analysis uses both machine learning and OpenAI for enhanced accuracy.
+                                </small>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg" id="analyzeUrlBtn">
+                                    <i class="bi bi-globe"></i> Analyze URL
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Loading indicator -->
+                <div id="loadingIndicator" class="text-center my-4 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Analyzing... Please wait</p>
+                </div>
+                
+                <!-- Error display -->
+                <div id="errorMessage" class="alert alert-danger mt-3 d-none">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <span id="errorText"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trending News Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h4 class="mb-0">
+                    <i class="bi bi-graph-up-arrow"></i> Trending News Stories
+                </h4>
+            </div>
+            <div class="card-body p-0">
+                <div class="trending-news-carousel">
+                    {% if trending %}
+                    <div id="trendingNewsCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for news in trending %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <div class="p-4">
+                                    <h5>{{ news.title }}</h5>
+                                    <p>{{ news.description }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">Source: {{ news.source }}</span>
+                                        <a href="{{ news.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Read More</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#trendingNewsCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon bg-dark rounded" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#trendingNewsCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon bg-dark rounded" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="p-4 text-center">
+                        <p>No trending news available at the moment.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form submission handling
+    const textForm = document.getElementById('textAnalysisForm');
+    const urlForm = document.getElementById('urlAnalysisForm');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+    
+    textForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        submitForm(new FormData(textForm));
+    });
+    
+    urlForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        submitForm(new FormData(urlForm));
+    });
+    
+    function submitForm(formData) {
+        // Show loading indicator, hide error message
+        loadingIndicator.classList.remove('d-none');
+        errorMessage.classList.add('d-none');
+        
+        fetch('/detect/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'An error occurred while processing your request.');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Redirect to results page
+            window.location.href = `/results/${data.result_id}/`;
+        })
+        .catch(error => {
+            // Hide loading indicator, show error message
+            loadingIndicator.classList.add('d-none');
+            errorMessage.classList.remove('d-none');
+            errorText.textContent = error.message;
+        });
+    }
+    
+    // Automatically refresh trending news every 5 minutes
+    setInterval(function() {
+        fetch('/trending/')
+            .then(response => response.json())
+            .then(data => {
+                // Update trending news
+                if (data.trending && data.trending.length > 0) {
+                    // Implementation would go here
+                    // This is a placeholder for auto-refresh functionality
+                }
+            })
+            .catch(error => console.error('Error refreshing trending news:', error));
+    }, 5 * 60 * 1000); // 5 minutes
+});
+</script>
+{% endblock %}
