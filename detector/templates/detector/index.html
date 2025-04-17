@@ -1,9 +1,75 @@
 {% extends 'detector/base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card shadow-lg border-0 rounded-lg mt-3 mb-5">
+<!-- Hero Section -->
+<div class="container-fluid py-5 mb-4 bg-light rounded-3">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-5 fw-bold text-primary mb-3">Detect Fake News</h1>
+                <p class="fs-4">Our AI-powered tool helps you identify fake news articles with advanced machine learning and OpenAI technologies.</p>
+                <p class="mb-4">Simply paste text or enter a URL to analyze news content instantly.</p>
+                <div class="d-flex gap-3">
+                    <a href="#detector-card" class="btn btn-primary btn-lg">
+                        <i class="bi bi-search"></i> Start Analyzing
+                    </a>
+                    <a href="#how-it-works" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-info-circle"></i> How It Works
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="{% static 'detector/images/fake-news-illustration.svg' %}" alt="Fake News Detection" class="img-fluid" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/2965/2965879.png'; this.style='max-width: 250px;'">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Section -->
+<div id="how-it-works" class="container mb-5">
+    <h2 class="text-center mb-4">How It Works</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                        <i class="bi bi-input-cursor-text"></i>
+                    </div>
+                    <h5 class="card-title">1. Input Content</h5>
+                    <p class="card-text">Paste news article text or enter a URL to begin the analysis process.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <h5 class="card-title">2. AI Analysis</h5>
+                    <p class="card-text">Our system uses machine learning and OpenAI to evaluate content authenticity.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h5 class="card-title">3. Get Results</h5>
+                    <p class="card-text">Receive detailed analysis with confidence score and key factors identified.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Detector Card -->
+<div class="row justify-content-center mb-5" id="detector-card">
+    <div class="col-lg-10">
+        <div class="card shadow-lg border-0 rounded-lg">
             <div class="card-header bg-primary text-white">
                 <h3 class="text-center font-weight-light my-2">
                     <i class="bi bi-search"></i> Fake News Detector
@@ -30,10 +96,17 @@
                 <div class="tab-content" id="detectionTabsContent">
                     <!-- Text Analysis Panel -->
                     <div class="tab-pane fade show active" id="text-panel" role="tabpanel">
-                        <form id="textAnalysisForm">
+                        <form id="textAnalysisForm" action="{% url 'detector:detect' %}" method="post">
+                            {% csrf_token %}
                             <div class="mb-3">
                                 <label for="news_text" class="form-label">News Article Text</label>
-                                <textarea class="form-control" id="news_text" name="news_text" rows="6" placeholder="Paste the news article text here..."></textarea>
+                                <textarea class="form-control" id="news_text" name="news_text" rows="6" placeholder="Paste the news article text here..." required></textarea>
+                                <div class="form-text">For best results, paste the full article text including the headline.</div>
+                            </div>
+                            <div class="text-end mb-3">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="clearTextBtn">
+                                    <i class="bi bi-x-circle"></i> Clear
+                                </button>
                             </div>
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg" id="analyzeTextBtn">
@@ -45,15 +118,18 @@
                     
                     <!-- URL Analysis Panel -->
                     <div class="tab-pane fade" id="url-panel" role="tabpanel">
-                        <form id="urlAnalysisForm">
+                        <form id="urlAnalysisForm" action="{% url 'detector:detect' %}" method="post">
+                            {% csrf_token %}
                             <div class="mb-3">
                                 <label for="news_url" class="form-label">News Article URL</label>
-                                <input type="url" class="form-control" id="news_url" name="news_url" placeholder="https://example.com/news-article">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-link"></i></span>
+                                    <input type="url" class="form-control" id="news_url" name="news_url" placeholder="https://example.com/news-article" required>
+                                </div>
+                                <div class="form-text">Enter the full URL to a news article for analysis.</div>
                             </div>
                             <div class="alert alert-secondary" role="alert">
-                                <small>
-                                    <i class="bi bi-lightbulb"></i> URL analysis uses both machine learning and OpenAI for enhanced accuracy.
-                                </small>
+                                <i class="bi bi-lightbulb"></i> URL analysis uses both machine learning and OpenAI for enhanced accuracy.
                             </div>
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg" id="analyzeUrlBtn">
@@ -81,47 +157,80 @@
     </div>
 </div>
 
-<!-- Trending News Section -->
-<div class="row">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-light">
-                <h4 class="mb-0">
-                    <i class="bi bi-graph-up-arrow"></i> Trending News Stories
-                </h4>
+<!-- Example Article Section -->
+<div class="container mb-5">
+    <h3 class="text-center mb-4">Try with Sample Articles</h3>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Known Fake News Example
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="sample-article">BREAKING: Scientists Discover That Drinking Coffee While Standing Increases Risk of Alien Abduction by 75%. A groundbreaking study by the International Coffee Research Institute found that individuals who consume coffee while in a standing position emit specific brainwaves that attract extraterrestrial attention...</p>
+                    <button class="btn btn-outline-danger btn-sm mt-2 sample-article-btn" data-type="fake">
+                        <i class="bi bi-clipboard"></i> Use This Example
+                    </button>
+                </div>
             </div>
-            <div class="card-body p-0">
-                <div class="trending-news-carousel">
-                    {% if trending %}
-                    <div id="trendingNewsCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-check-circle"></i> Known Real News Example
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="sample-article">Report: Global Efforts to Combat Climate Change Show Modest Progress. The United Nations climate panel released its annual report today documenting that while carbon emissions have slowed in several industrialized nations, more aggressive measures are still needed to meet Paris Agreement targets...</p>
+                    <button class="btn btn-outline-success btn-sm mt-2 sample-article-btn" data-type="real">
+                        <i class="bi bi-clipboard"></i> Use This Example
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trending News Section -->
+<div class="container mb-5">
+    <h3 class="text-center mb-4">
+        <i class="bi bi-graph-up-arrow"></i> Trending News Stories
+    </h3>
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="trending-news-container">
+                        {% if trending %}
+                        <div id="trendingNewsGrid" class="news-grid p-3">
                             {% for news in trending %}
-                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                <div class="p-4">
+                            <div class="news-card">
+                                {% if news.urlToImage %}
+                                <img src="{{ news.urlToImage }}" alt="{{ news.title }}" class="news-image">
+                                {% endif %}
+                                <div class="news-content">
+                                    <span class="news-source">{{ news.source.name }}</span>
                                     <h5>{{ news.title }}</h5>
-                                    <p>{{ news.description }}</p>
+                                    <p class="news-description">{{ news.description|default:"No description available." }}</p>
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted">Source: {{ news.source }}</span>
-                                        <a href="{{ news.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Read More</a>
+                                        <a href="{{ news.url }}" target="_blank" class="news-link">Read More</a>
+                                        <button class="btn btn-sm btn-outline-primary analyze-news-btn" data-url="{{ news.url }}">
+                                            <i class="bi bi-search"></i> Analyze
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                             {% endfor %}
                         </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#trendingNewsCarousel" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon bg-dark rounded" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#trendingNewsCarousel" data-bs-slide="next">
-                            <span class="carousel-control-next-icon bg-dark rounded" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
+                        {% else %}
+                        <div class="p-4 text-center">
+                            <p>No trending news available at the moment.</p>
+                        </div>
+                        {% endif %}
                     </div>
-                    {% else %}
-                    <div class="p-4 text-center">
-                        <p>No trending news available at the moment.</p>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
@@ -138,7 +247,55 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingIndicator = document.getElementById('loadingIndicator');
     const errorMessage = document.getElementById('errorMessage');
     const errorText = document.getElementById('errorText');
+    const clearTextBtn = document.getElementById('clearTextBtn');
+    const newsTextArea = document.getElementById('news_text');
     
+    // Clear text button functionality
+    if (clearTextBtn && newsTextArea) {
+        clearTextBtn.addEventListener('click', function() {
+            newsTextArea.value = '';
+            newsTextArea.focus();
+        });
+    }
+    
+    // Sample article buttons functionality
+    const sampleArticleBtns = document.querySelectorAll('.sample-article-btn');
+    sampleArticleBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const articleText = this.previousElementSibling.textContent;
+            newsTextArea.value = articleText;
+            
+            // Switch to text analysis tab if needed
+            const textTab = document.getElementById('text-tab');
+            if (textTab) {
+                textTab.click();
+            }
+            
+            // Scroll to form
+            document.getElementById('detector-card').scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+    
+    // Analyze trending news buttons
+    const analyzeNewsBtns = document.querySelectorAll('.analyze-news-btn');
+    analyzeNewsBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const newsUrl = this.getAttribute('data-url');
+            const urlInput = document.getElementById('news_url');
+            urlInput.value = newsUrl;
+            
+            // Switch to URL analysis tab
+            const urlTab = document.getElementById('url-tab');
+            if (urlTab) {
+                urlTab.click();
+            }
+            
+            // Scroll to form
+            document.getElementById('detector-card').scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+    
+    // Form submission handling
     textForm.addEventListener('submit', function(event) {
         event.preventDefault();
         submitForm(new FormData(textForm));
@@ -154,9 +311,16 @@ document.addEventListener('DOMContentLoaded', function() {
         loadingIndicator.classList.remove('d-none');
         errorMessage.classList.add('d-none');
         
+        // Disable submit buttons
+        document.getElementById('analyzeTextBtn').disabled = true;
+        document.getElementById('analyzeUrlBtn').disabled = true;
+        
         fetch('/detect/', {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
         })
         .then(response => {
             if (!response.ok) {
@@ -175,18 +339,81 @@ document.addEventListener('DOMContentLoaded', function() {
             loadingIndicator.classList.add('d-none');
             errorMessage.classList.remove('d-none');
             errorText.textContent = error.message;
+            
+            // Re-enable submit buttons
+            document.getElementById('analyzeTextBtn').disabled = false;
+            document.getElementById('analyzeUrlBtn').disabled = false;
         });
     }
+    
+    // Function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
     
     // Automatically refresh trending news every 5 minutes
     setInterval(function() {
         fetch('/trending/')
             .then(response => response.json())
             .then(data => {
-                // Update trending news
                 if (data.trending && data.trending.length > 0) {
-                    // Implementation would go here
-                    // This is a placeholder for auto-refresh functionality
+                    const newsGrid = document.getElementById('trendingNewsGrid');
+                    if (newsGrid) {
+                        let newsHTML = '';
+                        data.trending.forEach(news => {
+                            newsHTML += `
+                                <div class="news-card">
+                                    ${news.urlToImage ? `<img src="${news.urlToImage}" alt="${news.title}" class="news-image">` : ''}
+                                    <div class="news-content">
+                                        <span class="news-source">${news.source.name}</span>
+                                        <h5>${news.title}</h5>
+                                        <p class="news-description">${news.description || 'No description available.'}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="${news.url}" target="_blank" class="news-link">Read More</a>
+                                            <button class="btn btn-sm btn-outline-primary analyze-news-btn" data-url="${news.url}">
+                                                <i class="bi bi-search"></i> Analyze
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        newsGrid.innerHTML = newsHTML;
+                        
+                        // Re-attach event listeners to new analyze buttons
+                        document.querySelectorAll('.analyze-news-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const newsUrl = this.getAttribute('data-url');
+                                document.getElementById('news_url').value = newsUrl;
+                                document.getElementById('url-tab').click();
+                                document.getElementById('detector-card').scrollIntoView({ behavior: 'smooth' });
+                            });
+                        });
+                    }
                 }
             })
             .catch(error => console.error('Error refreshing trending news:', error));

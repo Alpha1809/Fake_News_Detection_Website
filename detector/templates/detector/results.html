@@ -1,110 +1,208 @@
 {% extends 'detector/base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="card shadow-lg border-0 rounded-lg mb-5">
-            <div class="card-header bg-primary text-white">
-                <h3 class="text-center font-weight-light my-2">
-                    <i class="bi bi-clipboard-data"></i> Detection Results
-                </h3>
-            </div>
-            <div class="card-body">
-                <!-- Analysis Result -->
-                <div class="text-center mb-4">
-                    <div class="result-badge {% if result.is_fake %}bg-danger{% else %}bg-success{% endif %} p-3 shadow animate__animated animate__bounceIn">
-                        <h2>
-                            {% if result.is_fake %}
-                            <i class="bi bi-exclamation-triangle-fill"></i> FAKE NEWS
-                            {% else %}
-                            <i class="bi bi-check-circle-fill"></i> REAL NEWS
-                            {% endif %}
-                        </h2>
-                        <p class="mb-0">with {{ result.confidence_score|floatformat:1 }}% confidence</p>
-                    </div>
+<!-- Results Summary -->
+<div class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header {% if result.is_fake %}bg-danger{% else %}bg-success{% endif %} text-white">
+                    <h3 class="text-center font-weight-light my-2">
+                        {% if result.is_fake %}
+                        <i class="bi bi-exclamation-triangle-fill"></i> Fake News Detected
+                        {% else %}
+                        <i class="bi bi-check-circle-fill"></i> Reliable Content Detected
+                        {% endif %}
+                    </h3>
                 </div>
-                
-                <!-- Confidence Visualization -->
-                <div class="row mb-4">
-                    <div class="col-md-8 offset-md-2">
-                        <h5 class="text-center mb-3">Reliability Score</h5>
-                        <canvas id="confidenceChart" height="150"></canvas>
-                    </div>
-                </div>
-                
-                <!-- Analysis Factors -->
-                <div class="row mb-4">
-                    <div class="col-md-10 offset-md-1">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0">
-                                    <i class="bi bi-list-check"></i> Detection Factors
-                                </h5>
+                <div class="card-body">
+                    <!-- Analysis Result Summary -->
+                    <div class="row align-items-center mb-4">
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <div class="result-badge {% if result.is_fake %}bg-danger{% else %}bg-success{% endif %} p-4 rounded-circle shadow-lg d-inline-block animate__animated animate__bounceIn">
+                                    <h1 class="display-4 mb-0">{{ result.confidence_score|floatformat:0 }}%</h1>
+                                    <p class="lead mb-0">confidence</p>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <p>Our analysis identified the following key factors in the article:</p>
-                                
-                                <ul class="list-group">
-                                    {% for factor, importance in explanation %}
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span>{{ factor }}</span>
-                                        <div class="progress" style="width: 60%;">
-                                            <div class="progress-bar {% if result.is_fake %}bg-danger{% else %}bg-success{% endif %}" 
-                                                 style="width: {{ importance|floatformat:4|slice:'2:' }}%;">
-                                                {{ importance|floatformat:4|slice:'2:' }}%
+                        </div>
+                        <div class="col-md-6">
+                            <div class="alert {% if result.is_fake %}alert-danger{% else %}alert-success{% endif %} mb-0">
+                                <h4 class="alert-heading">
+                                    {% if result.is_fake %}
+                                    <i class="bi bi-exclamation-triangle-fill"></i> This content appears to be false
+                                    {% else %}
+                                    <i class="bi bi-check-circle-fill"></i> This content appears to be reliable
+                                    {% endif %}
+                                </h4>
+                                <p>
+                                    {% if result.is_fake %}
+                                    Our AI-powered analysis indicates that this content contains misinformation or fabricated details. Exercise caution before sharing or believing this information.
+                                    {% else %}
+                                    Our AI-powered analysis indicates that this content appears to be factual and from a reliable source. As always, critical thinking is recommended.
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Analysis Methods Used -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h5><i class="bi bi-cpu"></i> Analysis Methods Used</h5>
+                                    <div class="row text-center">
+                                        <div class="col-md-6">
+                                            <div class="method-badge rounded p-2 mb-2 bg-primary text-white">
+                                                <i class="bi bi-robot"></i> Machine Learning Model
                                             </div>
                                         </div>
-                                    </li>
-                                    {% empty %}
-                                    <li class="list-group-item">No specific factors could be determined.</li>
-                                    {% endfor %}
-                                </ul>
-                                
-                                <div class="mt-3">
-                                    <p class="mb-1"><strong>How to interpret:</strong></p>
-                                    <ul>
-                                        <li>These factors represent the words or phrases that most influenced our model's decision.</li>
-                                        <li>The percentages indicate the relative importance of each factor in making the final prediction.</li>
-                                        <li>This is a statistical analysis and should be considered alongside human judgment.</li>
-                                    </ul>
+                                        {% if result.openai_prediction is not None %}
+                                        <div class="col-md-6">
+                                            <div class="method-badge rounded p-2 mb-2 bg-primary text-white">
+                                                <i class="bi bi-cpu-fill"></i> OpenAI Analysis
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Confidence Visualization -->
+                    <div class="row mb-4">
+                        <div class="col-md-8 offset-md-2">
+                            <h5 class="text-center mb-3">Reliability Score</h5>
+                            <canvas id="confidenceChart" height="200"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="row mb-4">
+                        <div class="col-12 text-center">
+                            <a href="{% url 'detector:index' %}" class="btn btn-primary btn-lg">
+                                <i class="bi bi-arrow-left"></i> Analyze Another Article
+                            </a>
+                            <button type="button" class="btn btn-outline-secondary btn-lg ms-2" data-bs-toggle="collapse" data-bs-target="#detailsSection">
+                                <i class="bi bi-chevron-down"></i> Show Analysis Details
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                
-                <!-- Article Text -->
-                <div class="row mb-4">
-                    <div class="col-md-10 offset-md-1">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0">
-                                    <i class="bi bi-file-text"></i> Analyzed Content
-                                </h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Analysis Section (collapsible) -->
+<div class="container mb-5 collapse" id="detailsSection">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Analysis Factors -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-check"></i> Detection Factors
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>Our analysis identified the following key factors that influenced the decision:</p>
+                    
+                    <ul class="list-group mb-4">
+                        {% for factor, importance in explanation %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="factor-text fw-bold">{{ factor }}</span>
+                                <span class="badge {% if result.is_fake %}bg-danger{% else %}bg-success{% endif %}">
+                                    {{ importance|floatformat:1 }}%
+                                </span>
                             </div>
-                            <div class="card-body">
-                                <div class="article-text">
-                                    {{ result.input_text|linebreaks }}
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar {% if result.is_fake %}bg-danger{% else %}bg-success{% endif %}" 
+                                     style="width: {{ importance }}%;">
                                 </div>
-                                
-                                {% if result.input_url %}
-                                <div class="mt-3">
-                                    <p class="mb-0">
-                                        <strong>Source URL:</strong> 
-                                        <a href="{{ result.input_url }}" target="_blank">{{ result.input_url }}</a>
-                                    </p>
-                                </div>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No specific factors could be determined for this content.</li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <div class="bg-light p-3 rounded">
+                        <h6><i class="bi bi-info-circle"></i> How to interpret these factors:</h6>
+                        <ul>
+                            <li>These factors represent the words or phrases that most influenced our model's decision.</li>
+                            <li>The percentages indicate the relative importance of each factor in making the final prediction.</li>
+                            <li>This is a statistical analysis and should be considered alongside human judgment.</li>
+                            <li>No single factor determines the overall result - the combination matters.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Article Text -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-text"></i> Analyzed Content
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="article-text mb-3 p-3 border rounded bg-light">
+                        {{ result.input_text|linebreaks }}
+                    </div>
+                    
+                    {% if result.input_url %}
+                    <div class="mt-3">
+                        <h6><i class="bi bi-link"></i> Source URL:</h6>
+                        <div class="input-group">
+                            <input type="text" class="form-control" value="{{ result.input_url }}" readonly id="source-url">
+                            <button class="btn btn-outline-secondary" type="button" id="copy-url-btn">
+                                <i class="bi bi-clipboard"></i> Copy
+                            </button>
+                            <a href="{{ result.input_url }}" target="_blank" class="btn btn-primary">
+                                <i class="bi bi-box-arrow-up-right"></i> Visit
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <h6 class="text-muted mb-3">Analysis metadata</h6>
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Analysis date:</th>
+                                    <td>{{ result.created_at }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">ML Model prediction:</th>
+                                    <td>
+                                        {% if result.ml_prediction %}
+                                        <span class="badge bg-danger">Fake</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Real</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if result.openai_prediction is not None %}
+                                <tr>
+                                    <th scope="row">OpenAI prediction:</th>
+                                    <td>
+                                        {% if result.openai_prediction %}
+                                        <span class="badge bg-danger">Fake</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Real</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
                                 {% endif %}
-                            </div>
-                        </div>
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-                
-                <!-- Back to Home -->
-                <div class="text-center">
-                    <a href="{% url 'detector:index' %}" class="btn btn-primary">
-                        <i class="bi bi-arrow-left"></i> Analyze Another Article
-                    </a>
                 </div>
             </div>
         </div>
@@ -112,46 +210,42 @@
 </div>
 
 <!-- Trending News Section -->
-<div class="row">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-light">
-                <h4 class="mb-0">
-                    <i class="bi bi-graph-up-arrow"></i> Trending News Stories
-                </h4>
-            </div>
-            <div class="card-body p-0">
-                <div class="trending-news-carousel">
-                    {% if trending %}
-                    <div id="trendingNewsCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
+<div class="container mb-5">
+    <h3 class="text-center mb-4">
+        <i class="bi bi-graph-up-arrow"></i> Trending News Stories
+    </h3>
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="trending-news-container">
+                        {% if trending %}
+                        <div id="trendingNewsGrid" class="news-grid p-3">
                             {% for news in trending %}
-                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                <div class="p-4">
+                            <div class="news-card">
+                                {% if news.urlToImage %}
+                                <img src="{{ news.urlToImage }}" alt="{{ news.title }}" class="news-image">
+                                {% endif %}
+                                <div class="news-content">
+                                    <span class="news-source">{{ news.source.name }}</span>
                                     <h5>{{ news.title }}</h5>
-                                    <p>{{ news.description }}</p>
+                                    <p class="news-description">{{ news.description|default:"No description available." }}</p>
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted">Source: {{ news.source }}</span>
-                                        <a href="{{ news.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Read More</a>
+                                        <a href="{{ news.url }}" target="_blank" class="news-link">Read More</a>
+                                        <a href="{% url 'detector:index' %}?analyze_url={{ news.url|urlencode }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-search"></i> Analyze
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                             {% endfor %}
                         </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#trendingNewsCarousel" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon bg-dark rounded" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#trendingNewsCarousel" data-bs-slide="next">
-                            <span class="carousel-control-next-icon bg-dark rounded" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
+                        {% else %}
+                        <div class="p-4 text-center">
+                            <p>No trending news available at the moment.</p>
+                        </div>
+                        {% endif %}
                     </div>
-                    {% else %}
-                    <div class="p-4 text-center">
-                        <p>No trending news available at the moment.</p>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
@@ -178,81 +272,124 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
+    // Draw gauge chart using standard doughnut chart (more compatible)
     new Chart(ctx, {
-        type: 'gauge',
+        type: 'doughnut',
         data: {
             datasets: [{
-                value: confidence,
-                minValue: 0,
-                maxValue: 1,
-                backgroundColor: getColor(confidence)
+                data: [confidence, 1 - confidence],
+                backgroundColor: [
+                    isFake ? '#dc3545' : '#198754',  // Bootstrap danger/success colors
+                    'rgba(200, 200, 200, 0.2)'
+                ],
+                borderWidth: 0
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            valueLabel: {
-                formatter: function(value) {
-                    return (value * 100).toFixed(1) + '%';
+            cutout: '70%',
+            rotation: -90,
+            circumference: 180,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: false
                 }
             }
         }
     });
     
-    // If Chart.js doesn't support gauge, use this fallback
-    if (typeof Chart.controllers.gauge === 'undefined') {
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                datasets: [{
-                    data: [confidence, 1 - confidence],
-                    backgroundColor: [
-                        getColor(confidence),
-                        'rgba(200, 200, 200, 0.2)'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                rotation: -90,
-                circumference: 180,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        enabled: false
-                    },
-                    datalabels: {
-                        formatter: function(value, context) {
-                            if (context.dataIndex === 0) {
-                                return (value * 100).toFixed(1) + '%';
-                            }
-                            return '';
-                        },
-                        color: '#000',
-                        font: {
-                            size: 20,
-                            weight: 'bold'
-                        }
-                    }
-                }
+    // Copy URL button functionality
+    const copyUrlBtn = document.getElementById('copy-url-btn');
+    const sourceUrl = document.getElementById('source-url');
+    
+    if (copyUrlBtn && sourceUrl) {
+        copyUrlBtn.addEventListener('click', function() {
+            sourceUrl.select();
+            document.execCommand('copy');
+            
+            // Show copied feedback
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            this.classList.remove('btn-outline-secondary');
+            this.classList.add('btn-success');
+            
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.classList.remove('btn-success');
+                this.classList.add('btn-outline-secondary');
+            }, 2000);
+        });
+    }
+    
+    // Toggle details section
+    const detailsButton = document.querySelector('[data-bs-target="#detailsSection"]');
+    if (detailsButton) {
+        detailsButton.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            if (isExpanded) {
+                icon.classList.remove('bi-chevron-up');
+                icon.classList.add('bi-chevron-down');
+                this.innerHTML = '<i class="bi bi-chevron-down"></i> Show Analysis Details';
+            } else {
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-up');
+                this.innerHTML = '<i class="bi bi-chevron-up"></i> Hide Analysis Details';
             }
         });
     }
+    
+    // Animate elements on scroll 
+    const animateElements = () => {
+        const elements = document.querySelectorAll('.list-group-item, .card');
+        elements.forEach(element => {
+            const position = element.getBoundingClientRect();
+            // If element is in viewport
+            if(position.top < window.innerHeight && position.bottom >= 0) {
+                if (!element.classList.contains('animated')) {
+                    element.classList.add('animated', 'animate__animated', 'animate__fadeIn');
+                }
+            }
+        });
+    };
+    
+    window.addEventListener('scroll', animateElements);
+    animateElements(); // Run once on page load
     
     // Automatically refresh trending news every 5 minutes
     setInterval(function() {
         fetch('/trending/')
             .then(response => response.json())
             .then(data => {
-                // Update trending news
                 if (data.trending && data.trending.length > 0) {
-                    // Implementation would go here
-                    // This is a placeholder for auto-refresh functionality
+                    const newsGrid = document.getElementById('trendingNewsGrid');
+                    if (newsGrid) {
+                        let newsHTML = '';
+                        data.trending.forEach(news => {
+                            newsHTML += `
+                                <div class="news-card">
+                                    ${news.urlToImage ? `<img src="${news.urlToImage}" alt="${news.title}" class="news-image">` : ''}
+                                    <div class="news-content">
+                                        <span class="news-source">${news.source.name}</span>
+                                        <h5>${news.title}</h5>
+                                        <p class="news-description">${news.description || 'No description available.'}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="${news.url}" target="_blank" class="news-link">Read More</a>
+                                            <a href="{% url 'detector:index' %}?analyze_url=${encodeURIComponent(news.url)}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-search"></i> Analyze
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        newsGrid.innerHTML = newsHTML;
+                    }
                 }
             })
             .catch(error => console.error('Error refreshing trending news:', error));
