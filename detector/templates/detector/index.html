@@ -14,53 +14,10 @@
                     <a href="#detector-card" class="btn btn-primary btn-lg">
                         <i class="bi bi-search"></i> Start Analyzing
                     </a>
-                    <a href="#how-it-works" class="btn btn-outline-secondary btn-lg">
-                        <i class="bi bi-info-circle"></i> How It Works
-                    </a>
                 </div>
             </div>
             <div class="col-lg-6 text-center">
                 <img src="{% static 'detector/images/fake-news-illustration.svg' %}" alt="Fake News Detection" class="img-fluid" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/2965/2965879.png'; this.style='max-width: 250px;'">
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- How It Works Section -->
-<div id="how-it-works" class="container mb-5">
-    <h2 class="text-center mb-4">How It Works</h2>
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
-                        <i class="bi bi-input-cursor-text"></i>
-                    </div>
-                    <h5 class="card-title">1. Input Content</h5>
-                    <p class="card-text">Paste news article text or enter a URL to begin the analysis process.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
-                        <i class="bi bi-cpu"></i>
-                    </div>
-                    <h5 class="card-title">2. AI Analysis</h5>
-                    <p class="card-text">Our system uses machine learning and OpenAI to evaluate content authenticity.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
-                        <i class="bi bi-graph-up"></i>
-                    </div>
-                    <h5 class="card-title">3. Get Results</h5>
-                    <p class="card-text">Receive detailed analysis with confidence score and key factors identified.</p>
-                </div>
             </div>
         </div>
     </div>
@@ -80,63 +37,66 @@
                     <i class="bi bi-info-circle-fill"></i> Enter a news article text or URL to analyze if it's fake news or not.
                 </div>
                 
-                <ul class="nav nav-tabs mb-3" id="detectionTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-panel" type="button" role="tab">
-                            <i class="bi bi-file-text"></i> Text Analysis
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="url-tab" data-bs-toggle="tab" data-bs-target="#url-panel" type="button" role="tab">
-                            <i class="bi bi-link-45deg"></i> URL Analysis
-                        </button>
-                    </li>
-                </ul>
+                <!-- Simplified Analysis Input -->
+                <div class="row g-3">
+                    <div class="col-12">
+                        <ul class="nav nav-pills nav-fill mb-4" id="detectionTabs">
+                            <li class="nav-item">
+                                <button class="nav-link active" id="text-tab" data-bs-toggle="pill" data-bs-target="#text-panel" type="button">
+                                    <i class="bi bi-file-text"></i> Text Analysis
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="url-tab" data-bs-toggle="pill" data-bs-target="#url-panel" type="button">
+                                    <i class="bi bi-link-45deg"></i> URL Analysis
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
                 
                 <div class="tab-content" id="detectionTabsContent">
                     <!-- Text Analysis Panel -->
-                    <div class="tab-pane fade show active" id="text-panel" role="tabpanel">
-                        <form id="textAnalysisForm" action="{% url 'detector:detect' %}" method="post">
+                    <div class="tab-pane fade show active p-3 bg-light rounded" id="text-panel">
+                        <form id="textAnalysisForm" action="{% url 'detector:detect' %}" method="post" class="row g-3 align-items-center">
                             {% csrf_token %}
-                            <div class="mb-3">
-                                <label for="news_text" class="form-label">News Article Text</label>
-                                <textarea class="form-control" id="news_text" name="news_text" rows="6" placeholder="Paste the news article text here..." required></textarea>
-                                <div class="form-text">For best results, paste the full article text including the headline.</div>
+                            <div class="col-md-9">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-card-text"></i></span>
+                                    <textarea class="form-control border-start-0" id="news_text" name="news_text" rows="2" placeholder="Enter or paste news article text here..." required></textarea>
+                                    <button type="button" class="btn btn-outline-secondary" id="clearTextBtn">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="text-end mb-3">
-                                <button type="button" class="btn btn-outline-secondary btn-sm" id="clearTextBtn">
-                                    <i class="bi bi-x-circle"></i> Clear
-                                </button>
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg" id="analyzeTextBtn">
-                                    <i class="bi bi-magic"></i> Analyze Text
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary w-100 h-100" id="analyzeTextBtn">
+                                    <i class="bi bi-search"></i> Analyze
                                 </button>
                             </div>
                         </form>
+                        <div class="form-text mt-2">For best results, paste the full article text including the headline.</div>
                     </div>
                     
                     <!-- URL Analysis Panel -->
-                    <div class="tab-pane fade" id="url-panel" role="tabpanel">
-                        <form id="urlAnalysisForm" action="{% url 'detector:detect' %}" method="post">
+                    <div class="tab-pane fade p-3 bg-light rounded" id="url-panel">
+                        <form id="urlAnalysisForm" action="{% url 'detector:detect' %}" method="post" class="row g-3 align-items-center">
                             {% csrf_token %}
-                            <div class="mb-3">
-                                <label for="news_url" class="form-label">News Article URL</label>
+                            <div class="col-md-9">
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-link"></i></span>
-                                    <input type="url" class="form-control" id="news_url" name="news_url" placeholder="https://example.com/news-article" required>
+                                    <span class="input-group-text bg-white"><i class="bi bi-link"></i></span>
+                                    <input type="url" class="form-control border-start-0" id="news_url" name="news_url" placeholder="https://example.com/news-article" required>
                                 </div>
-                                <div class="form-text">Enter the full URL to a news article for analysis.</div>
                             </div>
-                            <div class="alert alert-secondary" role="alert">
-                                <i class="bi bi-lightbulb"></i> URL analysis uses both machine learning and OpenAI for enhanced accuracy.
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg" id="analyzeUrlBtn">
-                                    <i class="bi bi-globe"></i> Analyze URL
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary w-100" id="analyzeUrlBtn">
+                                    <i class="bi bi-search"></i> Analyze
                                 </button>
                             </div>
                         </form>
+                        <div class="mt-2">
+                            <small class="text-muted"><i class="bi bi-lightbulb"></i> URL analysis uses both machine learning and OpenAI for enhanced accuracy.</small>
+                        </div>
                     </div>
                 </div>
                 
@@ -231,6 +191,46 @@
                         </div>
                         {% endif %}
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Section -->
+<div id="how-it-works" class="container mb-5">
+    <h2 class="text-center mb-4">How It Works</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                        <i class="bi bi-input-cursor-text"></i>
+                    </div>
+                    <h5 class="card-title">1. Input Content</h5>
+                    <p class="card-text">Paste news article text or enter a URL to begin the analysis process.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <h5 class="card-title">2. AI Analysis</h5>
+                    <p class="card-text">Our system uses machine learning and OpenAI to evaluate content authenticity.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h5 class="card-title">3. Get Results</h5>
+                    <p class="card-text">Receive detailed analysis with confidence score and key factors identified.</p>
                 </div>
             </div>
         </div>
